@@ -1,0 +1,7 @@
+openai-whisper
+srt
+torchaudio
+tqdm
+opencc-python-reimplemented
+googletrans
+srtranslator
