@@ -12,7 +12,7 @@ from srtranslator.translators.deepl_api import DeeplApi
 
 from tqdm import tqdm
 
-import utils
+from . import utils
 
 
 def process(whisper_model, audio, seg, lang, prompt):
@@ -38,18 +38,19 @@ class Transcribe:
     def run(self):
         for input in self.args.inputs:
             if os.path.isdir(input):
-                for filepath in glob.glob(os.path.join(input, "**/*.mp4"), recursive=True):
-                    self.transcribeFile(filepath)
+                for filepath in glob.glob(os.path.join(input, "**/*"), recursive=True):
+                    if utils.is_video(filepath):
+                        self.transcribe_file(filepath)
             else:
-                self.transcribeFile(input)
+                self.transcribe_file(input)
 
-    def transcribeFile(self, input):
-        logging.info(f"Transcribing {input}")
-        name, _ = os.path.splitext(input)
+    def transcribe_file(self, file):
+        logging.info(f"Transcribing {file}")
+        name, _ = os.path.splitext(file)
         if utils.check_exists(name + ".srt", False):
             return
 
-        audio = whisper.load_audio(input, sr=self.sampling_rate)
+        audio = whisper.load_audio(file, sr=self.sampling_rate)
         if (
                 self.args.vad == "1"
                 or self.args.vad == "auto"
@@ -64,7 +65,7 @@ class Transcribe:
         self._save_srt(output, transcribe_results)
         self.translate(output)
 
-        logging.info(f"Transcribed {input} to {output}")
+        logging.info(f"Transcribed {file} to {output}")
 
     def translate(self, filepath):
         srt = SrtFile(filepath)
@@ -102,7 +103,6 @@ class Transcribe:
         speeches = utils.merge_adjacent_segments(speeches, 0.5 * self.sampling_rate)
 
         logging.info(f"Done voice activity detection in {time.time() - tic:.1f} sec")
-        logging.info(f"Speeches: {speeches}")
         return speeches if len(speeches) > 1 else [{"start": 0, "end": len(audio)}]
 
     def _transcribe(self, audio, speech_timestamps):

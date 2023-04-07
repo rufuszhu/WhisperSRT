@@ -1,17 +1,16 @@
 import logging
 import os
-import re
 
-import srt
-import opencc
 
 def is_video(filename):
     _, ext = os.path.splitext(filename)
     return ext in [".mp4", ".mov", ".mkv", ".avi", ".flv", ".f4v", ".webm"]
 
+
 def is_srt(filename):
     _, ext = os.path.splitext(filename)
     return ext == ".srt"
+
 
 def change_ext(filename, new_ext):
     # Change the extension of filename to new_ext
@@ -19,6 +18,7 @@ def change_ext(filename, new_ext):
     if not new_ext.startswith("."):
         new_ext = "." + new_ext
     return base + new_ext
+
 
 def check_exists(output, force):
     if os.path.exists(output):

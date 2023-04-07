@@ -1,9 +1,10 @@
 import argparse
 import logging
+import torch
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Edit videos based on transcribed subtitles",
+        description="Generate subtitles for audio/video files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
@@ -22,7 +23,7 @@ def main():
     parser.add_argument(
         "-tr",
         "--translate",
-        help="Translate srt files into other languages",
+        help="Translate existing srt files into other languages",
         action=argparse.BooleanOptionalAction,
     )
     parser.add_argument(
@@ -34,18 +35,19 @@ def main():
     parser.add_argument(
         "--device",
         type=str,
-        default=None,
+        default="cuda" if torch.cuda.is_available() else "cpu",
         choices=["cpu", "cuda"],
         help="Force to CPU or GPU for transcribing. In default automatically use GPU if available.",
     )
     parser.add_argument(
         "--lang",
         type=str,
-        default="ja",
-        choices=["zh", "en", "ja"],
-        help="The output language of transcription",
+        default="",
+        help="The original language of the video/audio/srt, blank for auto detect"
     )
-    parser.add_argument("--dest", type=str, default="zh", help="Output language")
+    parser.add_argument(
+        "--dest", type=str, default="zh", help="Output language or the srt file"
+    )
     parser.add_argument(
         "--encoding", type=str, default="utf-8", help="Document encoding format"
     )
@@ -60,16 +62,20 @@ def main():
     args = parser.parse_args()
 
     if args.transcribe:
-        from transcribe import Transcribe
+        from .transcribe import Transcribe
 
         Transcribe(args).run()
     elif args.translate:
-        from translate import Translate
+        from .translate import Translate
 
         Translate(args).run()
     elif args.rename:
-        from rename import Rename
+        from .rename import Rename
 
         Rename(args)
     else:
         logging.warn("No action, use -t")
+
+
+if __name__ == '__main__':
+    main()

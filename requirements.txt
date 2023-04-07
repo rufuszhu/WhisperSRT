@@ -1,7 +1,3 @@
 openai-whisper
-srt
-torchaudio
-tqdm
-opencc-python-reimplemented
-googletrans
-srtranslator
+srtranslator~=0.2.2
+setuptools~=67.6.1
